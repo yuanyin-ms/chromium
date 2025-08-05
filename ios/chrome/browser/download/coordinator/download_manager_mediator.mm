@@ -16,6 +16,7 @@
 #import "ios/chrome/browser/download/model/document_download_tab_helper.h"
 #import "ios/chrome/browser/download/model/download_directory_util.h"
 #import "ios/chrome/browser/download/model/download_manager_tab_helper.h"
+#import "ios/chrome/browser/download/model/download_record_service.h"
 #import "ios/chrome/browser/download/model/external_app_util.h"
 #import "ios/chrome/browser/drive/model/drive_availability.h"
 #import "ios/chrome/browser/drive/model/drive_tab_helper.h"
@@ -59,6 +60,11 @@ void DownloadManagerMediator::SetDriveService(
 
 void DownloadManagerMediator::SetPrefService(PrefService* pref_service) {
   pref_service_ = pref_service;
+}
+
+void DownloadManagerMediator::SetDownloadRecordService(
+    DownloadRecordService* download_record_service) {
+  download_record_service_ = download_record_service;
 }
 
 void DownloadManagerMediator::SetConsumer(
@@ -109,6 +115,11 @@ void DownloadManagerMediator::StartDownloading() {
   // OK to change consumer state now to preven further user interactions with
   // "Start Download" button.
   [consumer_ setState:kDownloadManagerStateInProgress];
+
+  // Record the download in the record service
+  if (download_record_service_ && download_task_) {
+    download_record_service_->RecordDownload(download_task_);
+  }
 
   download_task_->Start(
       download_dir.Append(download_task_->GenerateFileName()));

@@ -98,6 +98,7 @@
 #import "ios/chrome/browser/download/coordinator/ar_quick_look_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/auto_deletion/auto_deletion_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/download_manager_coordinator.h"
+#import "ios/chrome/browser/download/coordinator/download_list_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/pass_kit_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/safari_download_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/vcard_coordinator.h"
@@ -505,6 +506,10 @@ enum class ToolbarKind {
 // Coordinator that manages the presentation of Download Manager UI.
 @property(nonatomic, strong)
     DownloadManagerCoordinator* downloadManagerCoordinator;
+
+// Coordinator that manages the presentation of Download List UI.
+@property(nonatomic, strong)
+    DownloadListCoordinator* downloadListCoordinator;
 
 // The coordinator that manages enterprise prompts.
 @property(nonatomic, strong)
@@ -1278,6 +1283,10 @@ enum class ToolbarKind {
   self.tabLifecycleMediator.downloadManagerTabHelperDelegate =
       self.downloadManagerCoordinator;
 
+  self.downloadListCoordinator = [[DownloadListCoordinator alloc]
+      initWithBaseViewController:self.browserContainerCoordinator.viewController
+                         browser:self.browser];
+
   self.qrScannerCoordinator =
       [[QRScannerLegacyCoordinator alloc] initWithBrowser:self.browser];
 
@@ -1449,6 +1458,9 @@ enum class ToolbarKind {
 
   [self.downloadManagerCoordinator stop];
   self.downloadManagerCoordinator = nil;
+
+  [self.downloadListCoordinator stop];
+  self.downloadListCoordinator = nil;
 
   [self.browserContainerCoordinator stop];
   self.browserContainerCoordinator = nil;
@@ -1624,6 +1636,9 @@ enum class ToolbarKind {
 
   [self.SafariDownloadCoordinator stop];
   self.SafariDownloadCoordinator = nil;
+
+  [self.downloadListCoordinator stop];
+  self.downloadListCoordinator = nil;
 
   [self.vcardCoordinator stop];
   self.vcardCoordinator = nil;
@@ -2249,18 +2264,7 @@ enum class ToolbarKind {
 }
 
 - (void)showDownloadsFolder {
-  NSURL* URL = GetFilesAppUrl();
-  if (!URL) {
-    return;
-  }
-
-  [[UIApplication sharedApplication] openURL:URL
-                                     options:@{}
-                           completionHandler:nil];
-
-  base::UmaHistogramEnumeration(
-      "Download.OpenDownloads.PerProfileType",
-      profile_metrics::GetBrowserProfileType(self.profile));
+  [self.downloadListCoordinator showDownloadList];
 }
 
 - (void)showRecentTabs {

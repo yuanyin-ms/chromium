@@ -1,0 +1,98 @@
+// Copyright 2025 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
+#define IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
+
+#include <string>
+#include <vector>
+
+#include "base/memory/weak_ptr.h"
+#include "base/time/time.h"
+#include "components/keyed_service/core/keyed_service.h"
+#include "ios/web/public/download/download_task.h"
+#include "ios/web/public/download/download_task_observer.h"
+#include "url/gurl.h"
+
+// Simple download record structure
+struct DownloadRecord {
+  DownloadRecord();
+  DownloadRecord(const DownloadRecord& other);
+  DownloadRecord& operator=(const DownloadRecord& other);
+  ~DownloadRecord();
+  
+  std::string download_id;
+  std::string url;
+  std::string file_name;
+  std::string mime_type;
+  base::Time created_time;
+  base::Time completed_time;
+  int64_t file_size = 0;
+  int64_t received_bytes = 0;
+  int64_t total_bytes = 0;
+  int progress_percent = -1;  // -1 means unknown, 0-100 for actual progress
+  web::DownloadTask::State state = web::DownloadTask::State::kNotStarted;
+};
+
+// Basic observer interface for download record changes
+class DownloadRecordObserver {
+ public:
+  virtual ~DownloadRecordObserver() = default;
+  
+  // Called when a new download is added to records
+  virtual void OnDownloadAdded(const DownloadRecord& record) {}
+  
+  // Called when a download's state changes
+  virtual void OnDownloadUpdated(const std::string& download_id,
+                                 web::DownloadTask::State new_state) {}
+};
+
+// A simple service to track download records
+// This is the minimal implementation to start with
+class DownloadRecordService : public KeyedService,
+                              public web::DownloadTaskObserver {
+ public:
+  DownloadRecordService();
+  
+  DownloadRecordService(const DownloadRecordService&) = delete;
+  DownloadRecordService& operator=(const DownloadRecordService&) = delete;
+  
+  ~DownloadRecordService() override;
+
+  // Record a new download and start observing it
+  void RecordDownload(web::DownloadTask* task);
+  
+  // Get all downloads (in-memory for now)
+  std::vector<DownloadRecord> GetAllDownloads() const;
+  
+  // Observer management
+  void AddObserver(DownloadRecordObserver* observer);
+  void RemoveObserver(DownloadRecordObserver* observer);
+
+ private:
+  // web::DownloadTaskObserver implementation
+  void OnDownloadUpdated(web::DownloadTask* task) override;
+  void OnDownloadDestroyed(web::DownloadTask* task) override;
+
+  // Notify observers of changes
+  void NotifyDownloadAdded(const DownloadRecord& record);
+  void NotifyDownloadUpdated(const std::string& download_id,
+                            web::DownloadTask::State new_state);
+  
+  // Convert DownloadTask to DownloadRecord
+  DownloadRecord CreateRecordFromTask(web::DownloadTask* task);
+  
+  // Find download record by task pointer
+  DownloadRecord* FindRecordByTask(web::DownloadTask* task);
+  
+  // In-memory storage for now (we'll add persistence later)
+  std::vector<DownloadRecord> downloads_;
+  
+  // Observer list
+  std::vector<DownloadRecordObserver*> observers_;
+  
+  base::WeakPtrFactory<DownloadRecordService> weak_ptr_factory_{this};
+};
+
+#endif  // IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
