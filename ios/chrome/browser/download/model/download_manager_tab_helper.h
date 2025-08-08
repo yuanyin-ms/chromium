@@ -84,7 +84,6 @@ class DownloadManagerTabHelper
 
   // web::DownloadTaskObserver overrides:
   void OnDownloadUpdated(web::DownloadTask* task) override;
-  void OnDownloadDestroyed(web::DownloadTask* task) override;
 
   // Assigns `task` to `task_`; replaces the current download if exists;
   // instructs the delegate that download has started.

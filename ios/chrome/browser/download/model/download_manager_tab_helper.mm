@@ -244,6 +244,9 @@ void DownloadManagerTabHelper::OnDownloadUpdated(web::DownloadTask* task) {
         delegate_started_ = false;
         [delegate_ downloadManagerTabHelper:this didCancelDownload:task_.get()];
       }
+      task_->RemoveObserver(this);
+      task_ = nullptr;
+      task_final_file_path_.clear();
       break;
     case web::DownloadTask::State::kInProgress:
       break;
@@ -271,13 +274,6 @@ void DownloadManagerTabHelper::OnDownloadUpdated(web::DownloadTask* task) {
       // OnDownloadUpdated cannot be called with this state.
       NOTREACHED();
   }
-}
-
-void DownloadManagerTabHelper::OnDownloadDestroyed(web::DownloadTask* task) {
-  DCHECK_EQ(task, task_.get());
-  task_->RemoveObserver(this);
-  task_ = nullptr;
-  task_final_file_path_.clear();
 }
 
 #pragma mark - Private
