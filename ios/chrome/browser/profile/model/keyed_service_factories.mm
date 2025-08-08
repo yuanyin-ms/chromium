@@ -140,6 +140,7 @@
 #import "ios/chrome/browser/share_extension/model/share_extension_service_factory.h"
 #import "ios/chrome/browser/share_kit/model/share_kit_service_factory.h"
 #import "ios/chrome/browser/shared/model/browser/browser_list_factory.h"
+#import "ios/chrome/browser/shared/public/features/features.h"
 #import "ios/chrome/browser/sharing_message/model/ios_sharing_message_bridge_factory.h"
 #import "ios/chrome/browser/sharing_message/model/ios_sharing_service_factory.h"
 #import "ios/chrome/browser/signin/model/about_signin_internals_factory.h"
@@ -276,7 +277,9 @@ void EnsureProfileKeyedServiceFactoriesBuilt() {
   DiscoverFeedServiceFactory::GetInstance();
   DistillerServiceFactory::GetInstance();
   DomainDiversityReporterFactory::GetInstance();
-  DownloadRecordServiceFactory::GetInstance();
+  if (IsDownloadListEnabled()) {
+    DownloadRecordServiceFactory::GetInstance();
+  }
   ExternalFileRemoverFactory::GetInstance();
   FollowServiceFactory::GetInstance();
   BwgServiceFactory::GetInstance();

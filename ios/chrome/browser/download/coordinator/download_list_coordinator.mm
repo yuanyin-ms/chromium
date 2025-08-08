@@ -4,12 +4,12 @@
 
 #import "ios/chrome/browser/download/coordinator/download_list_coordinator.h"
 
-#import "ios/chrome/browser/download/ui/download_list_view_controller.h"
+#import "base/logging.h"
 #import "ios/chrome/browser/download/coordinator/download_list_mediator.h"
 #import "ios/chrome/browser/download/model/download_record_service_factory.h"
+#import "ios/chrome/browser/download/ui/download_list_view_controller.h"
 #import "ios/chrome/browser/shared/model/browser/browser.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
-#import "base/logging.h"
 
 @interface DownloadListCoordinator ()
 @property(nonatomic, strong) DownloadListViewController* viewController;
@@ -22,36 +22,37 @@
 
 - (void)start {
   [super start];
-  
+
   // Create view controller
   self.viewController = [[DownloadListViewController alloc] init];
-  
+
   // Create mediator
   _mediator = std::make_unique<DownloadListMediator>();
-  
+
   // Get download record service
   ProfileIOS* profile = self.browser->GetProfile();
-  DownloadRecordService* downloadRecordService = 
+  DownloadRecordService* downloadRecordService =
       DownloadRecordServiceFactory::GetForProfile(profile);
-  
+
   // Configure mediator
   _mediator->SetDownloadRecordService(downloadRecordService);
   _mediator->SetConsumer(self.viewController);
-  
+
   DLOG(INFO) << "DownloadListCoordinator started";
 }
 
 - (void)stop {
   [super stop];
-  
+
   if (self.navigationController.presentingViewController) {
-    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+    [self.navigationController dismissViewControllerAnimated:YES
+                                                  completion:nil];
   }
-  
+
   _mediator.reset();
   self.viewController = nil;
   self.navigationController = nil;
-  
+
   DLOG(INFO) << "DownloadListCoordinator stopped";
 }
 
@@ -59,28 +60,29 @@
   if (!self.viewController) {
     [self start];
   }
-  
+
   // Create navigation controller if needed
   if (!self.navigationController) {
-    self.navigationController = [[UINavigationController alloc] 
-                                initWithRootViewController:self.viewController];
-    
+    self.navigationController = [[UINavigationController alloc]
+        initWithRootViewController:self.viewController];
+
     // Add close button
-    UIBarButtonItem* closeButton = [[UIBarButtonItem alloc] 
+    UIBarButtonItem* closeButton = [[UIBarButtonItem alloc]
         initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                              target:self
                              action:@selector(closeButtonTapped)];
     self.viewController.navigationItem.rightBarButtonItem = closeButton;
   }
-  
+
   // Present the view controller
-  [self.baseViewController presentViewController:self.navigationController 
-                                        animated:YES 
+  [self.baseViewController presentViewController:self.navigationController
+                                        animated:YES
                                       completion:^{
-    // Load download records after presentation
-    self->_mediator->LoadDownloadRecords();
-  }];
-  
+                                        // Load download records after
+                                        // presentation
+                                        self->_mediator->LoadDownloadRecords();
+                                      }];
+
   DLOG(INFO) << "DownloadListCoordinator presented";
 }
 

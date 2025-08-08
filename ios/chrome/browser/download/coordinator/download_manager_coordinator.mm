@@ -140,7 +140,10 @@
   _mediator.SetIdentityManager(IdentityManagerFactory::GetForProfile(profile));
   _mediator.SetDriveService(drive::DriveServiceFactory::GetForProfile(profile));
   _mediator.SetPrefService(profile->GetPrefs());
-  _mediator.SetDownloadRecordService(DownloadRecordServiceFactory::GetForProfile(profile));
+  if (IsDownloadListEnabled()) {
+    _mediator.SetDownloadRecordService(
+        DownloadRecordServiceFactory::GetForProfile(profile));
+  }
 
   _mediator.SetDownloadTask(_downloadTask);
   _mediator.SetConsumer(_viewController);

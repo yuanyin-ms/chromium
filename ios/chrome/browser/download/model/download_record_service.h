@@ -9,89 +9,64 @@
 #include <vector>
 
 #include "base/memory/weak_ptr.h"
-#include "base/time/time.h"
 #include "components/keyed_service/core/keyed_service.h"
+#include "ios/chrome/browser/download/model/download_record.h"
 #include "ios/web/public/download/download_task.h"
 #include "ios/web/public/download/download_task_observer.h"
-#include "url/gurl.h"
 
-// Simple download record structure
-struct DownloadRecord {
-  DownloadRecord();
-  DownloadRecord(const DownloadRecord& other);
-  DownloadRecord& operator=(const DownloadRecord& other);
-  ~DownloadRecord();
-  
-  std::string download_id;
-  std::string url;
-  std::string file_name;
-  std::string mime_type;
-  base::Time created_time;
-  base::Time completed_time;
-  int64_t file_size = 0;
-  int64_t received_bytes = 0;
-  int64_t total_bytes = 0;
-  int progress_percent = -1;  // -1 means unknown, 0-100 for actual progress
-  web::DownloadTask::State state = web::DownloadTask::State::kNotStarted;
-};
-
-// Basic observer interface for download record changes
+// Observer interface for download record changes.
 class DownloadRecordObserver {
  public:
   virtual ~DownloadRecordObserver() = default;
-  
-  // Called when a new download is added to records
+
+  // Called when a new download is added to the record.
   virtual void OnDownloadAdded(const DownloadRecord& record) {}
-  
-  // Called when a download's state changes
+
+  // Called when a download's state changes.
   virtual void OnDownloadUpdated(const std::string& download_id,
                                  web::DownloadTask::State new_state) {}
 };
 
-// A simple service to track download records
-// This is the minimal implementation to start with
 class DownloadRecordService : public KeyedService,
                               public web::DownloadTaskObserver {
  public:
   DownloadRecordService();
-  
+
   DownloadRecordService(const DownloadRecordService&) = delete;
   DownloadRecordService& operator=(const DownloadRecordService&) = delete;
-  
+
   ~DownloadRecordService() override;
 
-  // Record a new download and start observing it
+  // Record a new download and start observing it.
   void RecordDownload(web::DownloadTask* task);
-  
-  // Get all downloads (in-memory for now)
+
+  // Get all downloads.
   std::vector<DownloadRecord> GetAllDownloads() const;
-  
-  // Observer management
+
+  // Observer management.
   void AddObserver(DownloadRecordObserver* observer);
   void RemoveObserver(DownloadRecordObserver* observer);
 
  private:
-  // web::DownloadTaskObserver implementation
+  // web::DownloadTaskObserver implementation.
   void OnDownloadUpdated(web::DownloadTask* task) override;
   void OnDownloadDestroyed(web::DownloadTask* task) override;
 
-  // Notify observers of changes
+  // Notify observers of changes.
   void NotifyDownloadAdded(const DownloadRecord& record);
   void NotifyDownloadUpdated(const std::string& download_id,
-                            web::DownloadTask::State new_state);
-  
-  // Convert DownloadTask to DownloadRecord
+                             web::DownloadTask::State new_state);
+
+  // Convert DownloadTask to DownloadRecord.
   DownloadRecord CreateRecordFromTask(web::DownloadTask* task);
-  
-  // Find download record by task pointer
+
+  // Find download record by task pointer.
   DownloadRecord* FindRecordByTask(web::DownloadTask* task);
-  
-  // In-memory storage for now (we'll add persistence later)
+
+  // In-memory storage for now (we'll add persistence in next CL)
   std::vector<DownloadRecord> downloads_;
-  
-  // Observer list
   std::vector<DownloadRecordObserver*> observers_;
-  
+
   base::WeakPtrFactory<DownloadRecordService> weak_ptr_factory_{this};
 };
 

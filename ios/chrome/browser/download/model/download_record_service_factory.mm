@@ -10,13 +10,11 @@
 #import "ios/chrome/browser/download/model/download_record_service.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
 
-// static
 DownloadRecordServiceFactory* DownloadRecordServiceFactory::GetInstance() {
   static base::NoDestructor<DownloadRecordServiceFactory> instance;
   return instance.get();
 }
 
-// static  
 DownloadRecordService* DownloadRecordServiceFactory::GetForProfile(
     ProfileIOS* profile) {
   CHECK(profile);

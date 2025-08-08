@@ -116,16 +116,17 @@ void DownloadManagerMediator::StartDownloading() {
   // "Start Download" button.
   [consumer_ setState:kDownloadManagerStateInProgress];
 
-  // Record the download in the record service
-  if (download_record_service_ && download_task_) {
-    download_record_service_->RecordDownload(download_task_);
-  }
-
   download_task_->Start(
       download_dir.Append(download_task_->GenerateFileName()));
   // If an upload task associated with the current download task exists, start
   // to observe it.
   UpdateUploadTask();
+
+  // Record this download in DownloadRecordService if available and if this is a
+  // regular download (not being uploaded to Drive).
+  if (download_record_service_ && download_task_ && upload_task_ == nullptr) {
+    download_record_service_->RecordDownload(download_task_);
+  }
 }
 
 DownloadManagerState DownloadManagerMediator::GetDownloadManagerState() const {

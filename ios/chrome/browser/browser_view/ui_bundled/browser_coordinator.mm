@@ -97,8 +97,8 @@
 #import "ios/chrome/browser/docking_promo/coordinator/docking_promo_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/ar_quick_look_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/auto_deletion/auto_deletion_coordinator.h"
-#import "ios/chrome/browser/download/coordinator/download_manager_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/download_list_coordinator.h"
+#import "ios/chrome/browser/download/coordinator/download_manager_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/pass_kit_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/safari_download_coordinator.h"
 #import "ios/chrome/browser/download/coordinator/vcard_coordinator.h"
@@ -508,8 +508,7 @@ enum class ToolbarKind {
     DownloadManagerCoordinator* downloadManagerCoordinator;
 
 // Coordinator that manages the presentation of Download List UI.
-@property(nonatomic, strong)
-    DownloadListCoordinator* downloadListCoordinator;
+@property(nonatomic, strong) DownloadListCoordinator* downloadListCoordinator;
 
 // The coordinator that manages enterprise prompts.
 @property(nonatomic, strong)

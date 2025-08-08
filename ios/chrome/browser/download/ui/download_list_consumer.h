@@ -6,6 +6,7 @@
 #define IOS_CHROME_BROWSER_DOWNLOAD_UI_DOWNLOAD_LIST_CONSUMER_H_
 
 #import <Foundation/Foundation.h>
+
 #include <vector>
 
 #import "ios/chrome/browser/download/model/download_record_service.h"
