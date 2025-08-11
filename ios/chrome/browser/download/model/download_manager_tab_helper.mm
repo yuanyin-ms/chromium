@@ -370,10 +370,10 @@ void DownloadManagerTabHelper::MaybeScheduleFileForAutoDeletion() {
 
 void DownloadManagerTabHelper::ScheduleTaskDestruction() {
   base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
-      FROM_HERE,
-      base::BindOnce([](base::WeakPtr<DownloadManagerTabHelper> weak_self) {
-        if (weak_self) {
-          weak_self->task_ = nullptr;
-        }
-      }, weak_ptr_factory_.GetWeakPtr()));
+      FROM_HERE, base::BindOnce(&DownloadManagerTabHelper::DestroyTask,
+                                weak_ptr_factory_.GetWeakPtr()));
+}
+
+void DownloadManagerTabHelper::DestroyTask() {
+  task_.reset();
 }

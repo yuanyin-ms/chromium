@@ -114,6 +114,10 @@ class DownloadManagerTabHelper
   // Defers task destruction to avoid iterator invalidation during notification.
   void ScheduleTaskDestruction();
 
+  // Destroy the task. Must not be called directly.
+  // See ScheduleTaskDestruction().
+  void DestroyTask();
+
   raw_ptr<web::WebState> web_state_ = nullptr;
   __weak id<DownloadManagerTabHelperDelegate> delegate_ = nil;
   __weak id<SnackbarCommands> snackbar_handler_ = nil;
