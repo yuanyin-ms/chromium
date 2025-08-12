@@ -6,21 +6,10 @@
 
 #import <algorithm>
 
-<<<<<<< HEAD
-#import "base/logging.h"
-#import "base/strings/sys_string_conversions.h"
-#import "base/strings/utf_string_conversions.h"
-#import "base/time/time.h"
-#import "ios/chrome/browser/download/model/download_record.h"
-#import "ios/web/public/download/download_task.h"
-#import "ios/web/public/download/download_task_observer.h"
-#import "url/gurl.h"
-=======
 #import "base/strings/sys_string_conversions.h"
 #import "ios/chrome/browser/download/model/download_record.h"
 #import "ios/web/public/download/download_task.h"
 #import "ios/web/public/download/download_task_observer.h"
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 
 DownloadRecordService::DownloadRecordService() = default;
 
@@ -31,11 +20,7 @@ void DownloadRecordService::RecordDownload(web::DownloadTask* task) {
     return;
   }
 
-<<<<<<< HEAD
-  DownloadRecord record = CreateRecordFromTask(task);
-=======
   DownloadRecord record = DownloadRecord(task);
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 
   // Check if this download already exists (avoid duplicates)
   auto it = std::find_if(downloads_.begin(), downloads_.end(),
@@ -82,31 +67,6 @@ void DownloadRecordService::NotifyDownloadUpdated(
   }
 }
 
-<<<<<<< HEAD
-DownloadRecord DownloadRecordService::CreateRecordFromTask(
-    web::DownloadTask* task) {
-  DownloadRecord record;
-
-  if (!task) {
-    return record;
-  }
-
-  record.download_id = base::SysNSStringToUTF8(task->GetIdentifier());
-  record.url = task->GetOriginalUrl().spec();
-  record.file_name = task->GenerateFileName().value();
-  record.mime_type = task->GetMimeType();
-  record.created_time = base::Time::Now();
-  record.file_size = task->GetTotalBytes();
-  record.received_bytes = task->GetReceivedBytes();
-  record.total_bytes = task->GetTotalBytes();
-  record.progress_percent = task->GetPercentComplete();
-  record.state = task->GetState();
-
-  return record;
-}
-
-=======
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 #pragma mark - web::DownloadTaskObserver
 
 void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {

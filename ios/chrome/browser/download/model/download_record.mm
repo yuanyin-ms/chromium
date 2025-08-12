@@ -4,11 +4,6 @@
 
 #import "ios/chrome/browser/download/model/download_record.h"
 
-<<<<<<< HEAD
-DownloadRecord::DownloadRecord() = default;
-DownloadRecord::DownloadRecord(const DownloadRecord& other) = default;
-DownloadRecord& DownloadRecord::operator=(const DownloadRecord& other) = default;
-=======
 #import "base/files/file_path.h"
 #import "base/strings/sys_string_conversions.h"
 #import "base/time/time.h"
@@ -36,5 +31,4 @@ DownloadRecord::DownloadRecord(web::DownloadTask* task) {
 DownloadRecord::DownloadRecord(const DownloadRecord& other) = default;
 DownloadRecord& DownloadRecord::operator=(const DownloadRecord& other) =
     default;
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 DownloadRecord::~DownloadRecord() = default;

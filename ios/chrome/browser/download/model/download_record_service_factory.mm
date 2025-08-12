@@ -6,10 +6,6 @@
 
 #import <memory>
 
-<<<<<<< HEAD
-#import "base/no_destructor.h"
-=======
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 #import "ios/chrome/browser/download/model/download_record_service.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
 
@@ -26,13 +22,9 @@ DownloadRecordService* DownloadRecordServiceFactory::GetForProfile(
 }
 
 DownloadRecordServiceFactory::DownloadRecordServiceFactory()
-<<<<<<< HEAD
-    : ProfileKeyedServiceFactoryIOS("DownloadRecordService") {}
-=======
     : ProfileKeyedServiceFactoryIOS("IOSDownloadRecordService",
                                     ProfileSelection::kOwnInstanceInIncognito) {
 }
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 
 DownloadRecordServiceFactory::~DownloadRecordServiceFactory() = default;
 

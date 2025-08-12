@@ -5,16 +5,6 @@
 #ifndef IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
 #define IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
 
-<<<<<<< HEAD
-#include <string>
-#include <vector>
-
-#include "base/memory/weak_ptr.h"
-#include "components/keyed_service/core/keyed_service.h"
-#include "ios/chrome/browser/download/model/download_record.h"
-#include "ios/web/public/download/download_task.h"
-#include "ios/web/public/download/download_task_observer.h"
-=======
 #import <string>
 #import <vector>
 
@@ -23,18 +13,13 @@
 #import "ios/chrome/browser/download/model/download_record.h"
 #import "ios/web/public/download/download_task.h"
 #import "ios/web/public/download/download_task_observer.h"
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 
 // Observer interface for download record changes.
 class DownloadRecordObserver {
  public:
   virtual ~DownloadRecordObserver() = default;
 
-<<<<<<< HEAD
-  // Called when a new download is added to the record.
-=======
   // Called when a new download started.
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
   virtual void OnDownloadAdded(const DownloadRecord& record) {}
 
   // Called when a download's state changes.
@@ -72,12 +57,6 @@ class DownloadRecordService : public KeyedService,
   void NotifyDownloadUpdated(const std::string& download_id,
                              web::DownloadTask::State new_state);
 
-<<<<<<< HEAD
-  // Convert DownloadTask to DownloadRecord.
-  DownloadRecord CreateRecordFromTask(web::DownloadTask* task);
-
-=======
->>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
   // Find download record by task pointer.
   DownloadRecord* FindRecordByTask(web::DownloadTask* task);
 
