@@ -8,11 +8,11 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#include <vector>
+#import <vector>
 
 #import "ios/chrome/browser/download/model/download_record_service.h"
 #import "ios/chrome/browser/download/ui/download_list_consumer.h"
-#include "ios/chrome/browser/download/model/download_record.h"
+#import "ios/chrome/browser/download/model/download_record.h"
 
 @protocol DownloadListViewControllerDelegate <NSObject>
 #pragma mark - Download List Actions
