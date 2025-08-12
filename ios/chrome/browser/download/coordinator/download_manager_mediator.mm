@@ -63,7 +63,7 @@ void DownloadManagerMediator::SetPrefService(PrefService* pref_service) {
 }
 
 void DownloadManagerMediator::SetDownloadRecordService(
-  DownloadRecordService* download_record_service) {
+    DownloadRecordService* download_record_service) {
   CHECK(IsDownloadListEnabled());
   download_record_service_ = download_record_service;
 }

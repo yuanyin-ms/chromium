@@ -27,6 +27,7 @@ source_set("model") {
     "download_manager_tab_helper_delegate.h",
     "download_record.h",
     "download_record.mm",
+    "download_record_observer.h",
     "download_record_service.h",
     "download_record_service.mm",
     "download_record_service_factory.h",

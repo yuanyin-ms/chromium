@@ -5,8 +5,9 @@
 #ifndef IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
 #define IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
 
-#import <string>
 #import <map>
+#import <string>
+#import <string_view>
 #import <vector>
 
 #import "base/memory/weak_ptr.h"
@@ -15,19 +16,9 @@
 #import "base/scoped_multi_source_observation.h"
 #import "components/keyed_service/core/keyed_service.h"
 #import "ios/chrome/browser/download/model/download_record.h"
+#import "ios/chrome/browser/download/model/download_record_observer.h"
 #import "ios/web/public/download/download_task.h"
 #import "ios/web/public/download/download_task_observer.h"
-
-// Observer interface for download record changes.
-class DownloadRecordObserver : public base::CheckedObserver {
- public:
-  // Called when a new download started.
-  virtual void OnDownloadAdded(const DownloadRecord& record) {}
-
-  // Called when a download's state changed.
-  virtual void OnDownloadUpdated(const std::string& download_id,
-                                 web::DownloadTask::State new_state) {}
-};
 
 // Service that manages download records.
 class DownloadRecordService : public KeyedService,
@@ -47,35 +38,32 @@ class DownloadRecordService : public KeyedService,
   std::vector<DownloadRecord> GetAllDownloads() const;
 
   // Observer management.
-  // Get download task from record
-  web::DownloadTask* GetDownloadTask(const std::string& download_id) const;
-  // Remove a download record by ID
-  void RemoveDownload(const std::string& download_id);
-
   void AddObserver(DownloadRecordObserver* observer);
   void RemoveObserver(DownloadRecordObserver* observer);
 
- private:
   // web::DownloadTaskObserver implementation.
   void OnDownloadUpdated(web::DownloadTask* task) override;
   void OnDownloadDestroyed(web::DownloadTask* task) override;
 
-  // Notify observers of changes.
+ private:
+  // Notifies observers of changes.
   void NotifyDownloadAdded(const DownloadRecord& record);
-  void NotifyDownloadUpdated(const std::string& download_id,
+  void NotifyDownloadUpdated(std::string_view download_id,
                              web::DownloadTask::State new_state);
 
-  // Find download record by task pointer.
+  // Finds download record by task pointer.
   DownloadRecord* FindRecordByTask(web::DownloadTask* task);
 
   // In-memory storage for now (we'll add persistence in next CL).
   std::map<std::string, DownloadRecord> downloads_;
 
   // ObserverList for download record changes.
-  base::ObserverList<DownloadRecordObserver, /* check_empty= */true> observers_;
+  base::ObserverList<DownloadRecordObserver, /* check_empty= */ true>
+      observers_;
 
   // Observation for download tasks.
-  base::ScopedMultiSourceObservation<web::DownloadTask, web::DownloadTaskObserver>
+  base::ScopedMultiSourceObservation<web::DownloadTask,
+                                     web::DownloadTaskObserver>
       download_task_observations_{this};
 
   base::WeakPtrFactory<DownloadRecordService> weak_ptr_factory_{this};

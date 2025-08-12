@@ -17,6 +17,8 @@ struct DownloadRecord {
   explicit DownloadRecord(web::DownloadTask* task);
   DownloadRecord(const DownloadRecord& other);
   DownloadRecord& operator=(const DownloadRecord& other);
+  DownloadRecord(DownloadRecord&& other);
+  DownloadRecord& operator=(DownloadRecord&& other);
   ~DownloadRecord();
 
   // Unique identifier for this download.

@@ -29,4 +29,6 @@ DownloadRecord::DownloadRecord(web::DownloadTask* task) {
 DownloadRecord::DownloadRecord(const DownloadRecord& other) = default;
 DownloadRecord& DownloadRecord::operator=(const DownloadRecord& other) =
     default;
+DownloadRecord::DownloadRecord(DownloadRecord&& other) = default;
+DownloadRecord& DownloadRecord::operator=(DownloadRecord&& other) = default;
 DownloadRecord::~DownloadRecord() = default;

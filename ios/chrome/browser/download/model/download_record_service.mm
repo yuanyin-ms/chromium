@@ -8,12 +8,11 @@
 
 #import "base/strings/sys_string_conversions.h"
 #import "ios/chrome/browser/download/model/download_record.h"
+#import "ios/chrome/browser/shared/public/features/features.h"
 #import "ios/web/public/download/download_task.h"
 #import "ios/web/public/download/download_task_observer.h"
-#import "ios/chrome/browser/shared/public/features/features.h"
 
 #pragma mark - Public
-
 DownloadRecordService::DownloadRecordService() {
   CHECK(IsDownloadListEnabled());
 }
@@ -26,31 +25,16 @@ void DownloadRecordService::RecordDownload(web::DownloadTask* task) {
   }
 
   DownloadRecord record = DownloadRecord(task);
-
-  // Check if this download already exists (avoid duplicates).
-  if (downloads_.find(record.download_id) == downloads_.end()) {
-    downloads_[record.download_id] = record;
-    NotifyDownloadAdded(record);
-    download_task_observations_.AddObservation(task);
+  std::string record_id = record.download_id;
+  auto [iter, inserted] =
+      downloads_.emplace(std::move(record_id), std::move(record));
+  if (!inserted) {
+    // Duplicate, do not notify.
+    return;
   }
-}
 
-web::DownloadTask* DownloadRecordService::GetDownloadTask(
-    const std::string& download_id) const {
-  // TODO: Implement logic to retrieve the download task by ID
-  return nullptr;
-}
-
-void DownloadRecordService::RemoveDownload(const std::string& download_id) {
-  auto it = std::remove_if(downloads_.begin(), downloads_.end(),
-                           [&download_id](const DownloadRecord& record) {
-                             return record.download_id == download_id;
-                           });
-  if (it != downloads_.end()) {
-    downloads_.erase(it, downloads_.end());
-  } else {
-    DLOG(WARNING) << "RemoveDownload: download not found: " << download_id;
-  }
+  NotifyDownloadAdded(iter->second);
+  download_task_observations_.AddObservation(task);
 }
 
 std::vector<DownloadRecord> DownloadRecordService::GetAllDownloads() const {
@@ -70,8 +54,6 @@ void DownloadRecordService::RemoveObserver(DownloadRecordObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-#pragma mark - Private
-
 #pragma mark - web::DownloadTaskObserver
 void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {
   DownloadRecord* record = FindRecordByTask(task);
@@ -86,7 +68,7 @@ void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {
   record->progress_percent = task->GetPercentComplete();
 
   if (old_state != web::DownloadTask::State::kComplete &&
-      task->GetState() == web::DownloadTask::State::kComplete) {
+      record->state == web::DownloadTask::State::kComplete) {
     record->completed_time = base::Time::Now();
   }
 
@@ -94,21 +76,23 @@ void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {
     record->file_size = task->GetTotalBytes();
   }
 
-  NotifyDownloadUpdated(record->download_id, task->GetState());
+  NotifyDownloadUpdated(record->download_id, record->state);
 }
 
 void DownloadRecordService::OnDownloadDestroyed(web::DownloadTask* task) {
   download_task_observations_.RemoveObservation(task);
 }
 
+#pragma mark - Private
 void DownloadRecordService::NotifyDownloadAdded(const DownloadRecord& record) {
   observers_.Notify(&DownloadRecordObserver::OnDownloadAdded, record);
 }
 
 void DownloadRecordService::NotifyDownloadUpdated(
-    const std::string& download_id,
+    std::string_view download_id,
     web::DownloadTask::State new_state) {
-  observers_.Notify(&DownloadRecordObserver::OnDownloadUpdated, download_id, new_state);
+  observers_.Notify(&DownloadRecordObserver::OnDownloadUpdated, download_id,
+                    new_state);
 }
 
 DownloadRecord* DownloadRecordService::FindRecordByTask(
