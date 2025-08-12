@@ -4,7 +4,37 @@
 
 #import "ios/chrome/browser/download/model/download_record.h"
 
+<<<<<<< HEAD
 DownloadRecord::DownloadRecord() = default;
 DownloadRecord::DownloadRecord(const DownloadRecord& other) = default;
 DownloadRecord& DownloadRecord::operator=(const DownloadRecord& other) = default;
+=======
+#import "base/files/file_path.h"
+#import "base/strings/sys_string_conversions.h"
+#import "base/time/time.h"
+#import "url/gurl.h"
+
+DownloadRecord::DownloadRecord() = default;
+
+DownloadRecord::DownloadRecord(web::DownloadTask* task) {
+  if (!task) {
+    return;
+  }
+
+  download_id = base::SysNSStringToUTF8(task->GetIdentifier());
+  url = task->GetOriginalUrl().spec();
+  file_name = task->GenerateFileName().value();
+  mime_type = task->GetMimeType();
+  created_time = base::Time::Now();
+  file_size = task->GetTotalBytes();
+  received_bytes = task->GetReceivedBytes();
+  total_bytes = task->GetTotalBytes();
+  progress_percent = task->GetPercentComplete();
+  state = task->GetState();
+}
+
+DownloadRecord::DownloadRecord(const DownloadRecord& other) = default;
+DownloadRecord& DownloadRecord::operator=(const DownloadRecord& other) =
+    default;
+>>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 DownloadRecord::~DownloadRecord() = default;

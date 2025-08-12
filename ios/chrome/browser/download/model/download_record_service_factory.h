@@ -5,8 +5,13 @@
 #ifndef IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_FACTORY_H_
 #define IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_FACTORY_H_
 
+<<<<<<< HEAD
 #include "base/no_destructor.h"
 #include "ios/chrome/browser/shared/model/profile/profile_keyed_service_factory_ios.h"
+=======
+#import "base/no_destructor.h"
+#import "ios/chrome/browser/shared/model/profile/profile_keyed_service_factory_ios.h"
+>>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
 
 class DownloadRecordService;
 

@@ -122,8 +122,7 @@ void DownloadManagerMediator::StartDownloading() {
   // to observe it.
   UpdateUploadTask();
 
-  // Record this download in DownloadRecordService if available and if this is a
-  // regular download (not being uploaded to Drive).
+  // Record regular downloads (excludes Drive uploads).
   if (download_record_service_ && download_task_ && upload_task_ == nullptr) {
     download_record_service_->RecordDownload(download_task_);
   }

@@ -5,6 +5,7 @@
 #ifndef IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_H_
 #define IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_H_
 
+<<<<<<< HEAD
 #include <string>
 
 #include "base/time/time.h"
@@ -16,6 +17,20 @@ struct DownloadRecord {
   DownloadRecord& operator=(const DownloadRecord& other);
   ~DownloadRecord();
   
+=======
+#import <string>
+
+#import "base/time/time.h"
+#import "ios/web/public/download/download_task.h"
+
+struct DownloadRecord {
+  DownloadRecord();
+  explicit DownloadRecord(web::DownloadTask* task);
+  DownloadRecord(const DownloadRecord& other);
+  DownloadRecord& operator=(const DownloadRecord& other);
+  ~DownloadRecord();
+
+>>>>>>> 3d6110c25c644 ([iOS] Add DownloadRecordService to track download records)
   std::string download_id;
   std::string url;
   std::string file_name;
