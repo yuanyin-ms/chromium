@@ -10,8 +10,11 @@
 #import "ios/chrome/browser/download/model/download_record.h"
 #import "ios/web/public/download/download_task.h"
 #import "ios/web/public/download/download_task_observer.h"
+#import "ios/chrome/browser/shared/public/features/features.h"
 
-DownloadRecordService::DownloadRecordService() = default;
+DownloadRecordService::DownloadRecordService() {
+  CHECK(IsDownloadListEnabled());
+}
 
 DownloadRecordService::~DownloadRecordService() = default;
 
@@ -22,58 +25,44 @@ void DownloadRecordService::RecordDownload(web::DownloadTask* task) {
 
   DownloadRecord record = DownloadRecord(task);
 
-  // Check if this download already exists (avoid duplicates)
-  auto it = std::find_if(downloads_.begin(), downloads_.end(),
-                         [&record](const DownloadRecord& existing) {
-                           return existing.download_id == record.download_id;
-                         });
-
-  if (it == downloads_.end()) {
-    downloads_.push_back(record);
+  // Check if this download already exists (avoid duplicates).
+  if (downloads_.find(record.download_id) == downloads_.end()) {
+    downloads_[record.download_id] = record;
     NotifyDownloadAdded(record);
     task->AddObserver(this);
   }
 }
 
 std::vector<DownloadRecord> DownloadRecordService::GetAllDownloads() const {
-  return downloads_;
+  std::vector<DownloadRecord> records;
+  records.reserve(downloads_.size());
+  for (const auto& [id, record] : downloads_) {
+    records.push_back(record);
+  }
+  return records;
 }
 
 void DownloadRecordService::AddObserver(DownloadRecordObserver* observer) {
-  if (observer && std::find(observers_.begin(), observers_.end(), observer) ==
-                      observers_.end()) {
-    observers_.push_back(observer);
-  }
+  observers_.AddObserver(observer);
 }
 
 void DownloadRecordService::RemoveObserver(DownloadRecordObserver* observer) {
-  auto it = std::find(observers_.begin(), observers_.end(), observer);
-  if (it != observers_.end()) {
-    observers_.erase(it);
-  }
+  observers_.RemoveObserver(observer);
 }
 
 void DownloadRecordService::NotifyDownloadAdded(const DownloadRecord& record) {
-  for (auto* observer : observers_) {
-    observer->OnDownloadAdded(record);
-  }
+  observers_.Notify(&DownloadRecordObserver::OnDownloadAdded, record);
 }
 
 void DownloadRecordService::NotifyDownloadUpdated(
     const std::string& download_id,
     web::DownloadTask::State new_state) {
-  for (auto* observer : observers_) {
-    observer->OnDownloadUpdated(download_id, new_state);
-  }
+  observers_.Notify(&DownloadRecordObserver::OnDownloadUpdated, download_id, new_state);
 }
 
 #pragma mark - web::DownloadTaskObserver
 
 void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {
-  if (!task) {
-    return;
-  }
-
   DownloadRecord* record = FindRecordByTask(task);
   if (!record) {
     return;
@@ -107,15 +96,9 @@ void DownloadRecordService::OnDownloadDestroyed(web::DownloadTask* task) {
 
 DownloadRecord* DownloadRecordService::FindRecordByTask(
     web::DownloadTask* task) {
-  if (!task) {
-    return nullptr;
-  }
+  DCHECK(task);
 
   std::string task_id = base::SysNSStringToUTF8(task->GetIdentifier());
-  auto it = std::find_if(downloads_.begin(), downloads_.end(),
-                         [&task_id](DownloadRecord& record) {
-                           return record.download_id == task_id;
-                         });
-
-  return (it != downloads_.end()) ? &(*it) : nullptr;
+  auto it = downloads_.find(task_id);
+  return (it != downloads_.end()) ? &it->second : nullptr;
 }

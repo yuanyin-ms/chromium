@@ -6,27 +6,29 @@
 #define IOS_CHROME_BROWSER_DOWNLOAD_MODEL_DOWNLOAD_RECORD_SERVICE_H_
 
 #import <string>
+#import <map>
 #import <vector>
 
 #import "base/memory/weak_ptr.h"
+#import "base/observer_list.h"
+#import "base/observer_list_types.h"
 #import "components/keyed_service/core/keyed_service.h"
 #import "ios/chrome/browser/download/model/download_record.h"
 #import "ios/web/public/download/download_task.h"
 #import "ios/web/public/download/download_task_observer.h"
 
 // Observer interface for download record changes.
-class DownloadRecordObserver {
+class DownloadRecordObserver : public base::CheckedObserver {
  public:
-  virtual ~DownloadRecordObserver() = default;
-
   // Called when a new download started.
   virtual void OnDownloadAdded(const DownloadRecord& record) {}
 
-  // Called when a download's state changes.
+  // Called when a download's state changed.
   virtual void OnDownloadUpdated(const std::string& download_id,
                                  web::DownloadTask::State new_state) {}
 };
 
+// Service that manages download records.
 class DownloadRecordService : public KeyedService,
                               public web::DownloadTaskObserver {
  public:
@@ -37,10 +39,10 @@ class DownloadRecordService : public KeyedService,
 
   ~DownloadRecordService() override;
 
-  // Record a new download and start observing it.
+  // Records a new download and start observing it.
   void RecordDownload(web::DownloadTask* task);
 
-  // Get all downloads.
+  // Returns all downloads.
   std::vector<DownloadRecord> GetAllDownloads() const;
 
   // Observer management.
@@ -60,9 +62,11 @@ class DownloadRecordService : public KeyedService,
   // Find download record by task pointer.
   DownloadRecord* FindRecordByTask(web::DownloadTask* task);
 
-  // In-memory storage for now (we'll add persistence in next CL)
-  std::vector<DownloadRecord> downloads_;
-  std::vector<DownloadRecordObserver*> observers_;
+  // In-memory storage for now (we'll add persistence in next CL).
+  std::map<std::string, DownloadRecord> downloads_;
+
+  // ObserverList for download record changes.
+  base::ObserverList<DownloadRecordObserver> observers_;
 
   base::WeakPtrFactory<DownloadRecordService> weak_ptr_factory_{this};
 };

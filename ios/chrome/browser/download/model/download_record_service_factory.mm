@@ -17,8 +17,8 @@ DownloadRecordServiceFactory* DownloadRecordServiceFactory::GetInstance() {
 DownloadRecordService* DownloadRecordServiceFactory::GetForProfile(
     ProfileIOS* profile) {
   CHECK(profile);
-  return static_cast<DownloadRecordService*>(
-      GetInstance()->GetServiceForBrowserState(profile, true));
+  return GetInstance()->GetServiceForProfileAs<DownloadRecordService>(
+      profile, /*create=*/true);
 }
 
 DownloadRecordServiceFactory::DownloadRecordServiceFactory()

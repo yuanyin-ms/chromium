@@ -10,6 +10,8 @@
 
 class DownloadRecordService;
 
+// A factory to create a unique `DownloadRecordService` per
+// profile.
 class DownloadRecordServiceFactory : public ProfileKeyedServiceFactoryIOS {
  public:
   static DownloadRecordServiceFactory* GetInstance();
