@@ -35,6 +35,31 @@ void DownloadListMediator::SetDownloadRecordService(
   }
 }
 
+void DownloadListMediator::RemoveDownloadTask(const std::string& download_id) {
+  if (!download_record_service_) {
+    DLOG(WARNING) << "RemoveDownloadTask: missing download record service";
+    return;
+  }
+  web::DownloadTask* task =
+      download_record_service_->GetDownloadTask(download_id);
+  if (task) {
+    task->Cancel();
+    download_record_service_->RemoveDownload(download_id);
+  }
+}
+
+void DownloadListMediator::CancelDownloadTask(const std::string& download_id) {
+  if (!download_record_service_) {
+    DLOG(WARNING) << "RemoveDownloadTask: missing download record service";
+    return;
+  }
+  web::DownloadTask* task =
+      download_record_service_->GetDownloadTask(download_id);
+  if (task) {
+    task->Cancel();
+  }
+}
+
 void DownloadListMediator::LoadDownloadRecords() {
   if (!download_record_service_ || !consumer_) {
     DLOG(WARNING) << "LoadDownloadRecords: missing service or consumer";
@@ -56,6 +81,18 @@ void DownloadListMediator::LoadDownloadRecords() {
   [consumer_ setEmptyState:(records.size() == 0)];
 
   DLOG(INFO) << "Loaded " << records.size() << " download records";
+}
+
+void DownloadListMediator::SyncRecordsIfNeeded() {
+  if (!download_record_service_) {
+    DLOG(WARNING) << "SyncRecordsIfNeeded: missing download record service";
+    return;
+  }
+
+  // Sync records with the service
+  download_record_service_->SyncRecords();
+
+  DLOG(INFO) << "Download records synced";
 }
 
 void DownloadListMediator::UpdateConsumer() {
