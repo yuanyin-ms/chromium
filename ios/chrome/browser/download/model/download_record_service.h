@@ -46,6 +46,11 @@ class DownloadRecordService : public KeyedService,
   std::vector<DownloadRecord> GetAllDownloads() const;
 
   // Observer management.
+  // Get download task from record
+  web::DownloadTask* GetDownloadTask(const std::string& download_id) const;
+  // Remove a download record by ID
+  void RemoveDownload(const std::string& download_id);
+
   void AddObserver(DownloadRecordObserver* observer);
   void RemoveObserver(DownloadRecordObserver* observer);
 

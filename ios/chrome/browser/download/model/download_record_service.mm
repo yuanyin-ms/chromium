@@ -33,6 +33,24 @@ void DownloadRecordService::RecordDownload(web::DownloadTask* task) {
   }
 }
 
+web::DownloadTask* DownloadRecordService::GetDownloadTask(
+    const std::string& download_id) const {
+  // TODO: Implement logic to retrieve the download task by ID
+  return nullptr;
+}
+
+void DownloadRecordService::RemoveDownload(const std::string& download_id) {
+  auto it = std::remove_if(downloads_.begin(), downloads_.end(),
+                           [&download_id](const DownloadRecord& record) {
+                             return record.download_id == download_id;
+                           });
+  if (it != downloads_.end()) {
+    downloads_.erase(it, downloads_.end());
+  } else {
+    DLOG(WARNING) << "RemoveDownload: download not found: " << download_id;
+  }
+}
+
 std::vector<DownloadRecord> DownloadRecordService::GetAllDownloads() const {
   std::vector<DownloadRecord> records;
   records.reserve(downloads_.size());

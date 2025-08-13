@@ -26,8 +26,18 @@ class DownloadListMediator : public DownloadRecordObserver {
   // Sets the download record service.
   void SetDownloadRecordService(DownloadRecordService* service);
 
+  // Removes a download record by ID.
+  void RemoveDownloadTask(const std::string& download_id);
+  // Cancels a download task by ID.
+  void CancelDownloadTask(const std::string& download_id);
+
   // Loads download records.
   void LoadDownloadRecords();
+  // Syncs download records if needed.
+  void SyncRecordsIfNeeded();
+
+  // Search by keyword.
+  void SearchByKeyword(const std::string& keyword);
 
   // DownloadRecordObserver implementation
   void OnDownloadAdded(const DownloadRecord& record) override;
