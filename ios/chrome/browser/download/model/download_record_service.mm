@@ -61,11 +61,6 @@ std::vector<DownloadRecord> DownloadRecordService::GetAllDownloads() const {
   return downloads_;
 }
 
-std::vector<DownloadRecord> DownloadRecordService::SyncRecords() const {
-  // TODO: Implement logic to sync records with the file system
-  return downloads_;
-}
-
 void DownloadRecordService::AddObserver(DownloadRecordObserver* observer) {
   if (observer && std::find(observers_.begin(), observers_.end(), observer) ==
                       observers_.end()) {

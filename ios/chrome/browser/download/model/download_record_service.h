@@ -48,8 +48,6 @@ class DownloadRecordService : public KeyedService,
   web::DownloadTask* GetDownloadTask(const std::string& download_id) const;
   // Remove a download record by ID
   void RemoveDownload(const std::string& download_id);
-  // Syncs records when files are removed or renamed.
-  std::vector<DownloadRecord> SyncRecords() const;
 
   void AddObserver(DownloadRecordObserver* observer);
   void RemoveObserver(DownloadRecordObserver* observer);

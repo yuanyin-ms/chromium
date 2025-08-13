@@ -36,6 +36,9 @@ class DownloadListMediator : public DownloadRecordObserver {
   // Syncs download records if needed.
   void SyncRecordsIfNeeded();
 
+  // Search by keyword.
+  void SearchByKeyword(const std::string& keyword);
+
   // DownloadRecordObserver implementation
   void OnDownloadAdded(const DownloadRecord& record) override;
   void OnDownloadUpdated(const std::string& download_id,

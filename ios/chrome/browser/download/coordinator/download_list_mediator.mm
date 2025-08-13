@@ -72,15 +72,10 @@ void DownloadListMediator::LoadDownloadRecords() {
   std::vector<DownloadRecord> records =
       download_record_service_->GetAllDownloads();
 
-  DLOG(INFO) << "LoadDownloadRecords: got " << records.size()
-             << " records from service";
-
   // Directly pass the C++ vector to the consumer
   [consumer_ setDownloadRecords:records];
   [consumer_ setLoadingState:NO];
   [consumer_ setEmptyState:(records.size() == 0)];
-
-  DLOG(INFO) << "Loaded " << records.size() << " download records";
 }
 
 void DownloadListMediator::SyncRecordsIfNeeded() {
@@ -90,13 +85,34 @@ void DownloadListMediator::SyncRecordsIfNeeded() {
   }
 
   // Sync records with the service
-  download_record_service_->SyncRecords();
-
-  DLOG(INFO) << "Download records synced";
+  // Get all download records
+  std::vector<DownloadRecord> records =
+      download_record_service_->GetAllDownloads();
+  // TODO: Implement logic to sync records with the file system
+  [consumer_ setDownloadRecords:records];
 }
 
 void DownloadListMediator::UpdateConsumer() {
   LoadDownloadRecords();
+}
+
+#pragma mark - Search and Filter
+void DownloadListMediator::SearchByKeyword(const std::string& keyword) {
+  if (!download_record_service_ || !consumer_) {
+    DLOG(WARNING) << "SearchByKeyword: missing service or consumer";
+    return;
+  }
+
+  // Perform the search
+  std::vector<DownloadRecord> results;
+  for (const auto& record : download_record_service_->GetAllDownloads()) {
+    if (record.file_name.find(keyword) != std::string::npos) {
+      results.push_back(record);
+    }
+  }
+
+  // Update the consumer with the search results
+  [consumer_ setDownloadRecords:results];
 }
 
 #pragma mark - DownloadRecordObserver
