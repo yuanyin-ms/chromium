@@ -12,9 +12,7 @@
 DownloadRecord::DownloadRecord() = default;
 
 DownloadRecord::DownloadRecord(web::DownloadTask* task) {
-  if (!task) {
-    return;
-  }
+  DCHECK(task);
 
   download_id = base::SysNSStringToUTF8(task->GetIdentifier());
   url = task->GetOriginalUrl().spec();

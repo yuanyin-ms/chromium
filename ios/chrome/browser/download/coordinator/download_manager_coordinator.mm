@@ -175,6 +175,9 @@
   _mediator.SetDriveService(nullptr);
   _mediator.SetPrefService(nullptr);
   _mediator.SetIdentityManager(nullptr);
+  if (IsDownloadListEnabled()) {
+    _mediator.SetDownloadRecordService(nullptr);
+  }
   if (base::FeatureList::IsEnabled(kIOSDownloadNoUIUpdateInBackground)) {
     _mediator.StopObservingNotifications();
   }

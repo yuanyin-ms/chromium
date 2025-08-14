@@ -12,6 +12,7 @@
 #import "base/memory/weak_ptr.h"
 #import "base/observer_list.h"
 #import "base/observer_list_types.h"
+#import "base/scoped_multi_source_observation.h"
 #import "components/keyed_service/core/keyed_service.h"
 #import "ios/chrome/browser/download/model/download_record.h"
 #import "ios/web/public/download/download_task.h"
@@ -71,7 +72,11 @@ class DownloadRecordService : public KeyedService,
   std::map<std::string, DownloadRecord> downloads_;
 
   // ObserverList for download record changes.
-  base::ObserverList<DownloadRecordObserver> observers_;
+  base::ObserverList<DownloadRecordObserver, /* check_empty= */true> observers_;
+
+  // Observation for download tasks.
+  base::ScopedMultiSourceObservation<web::DownloadTask, web::DownloadTaskObserver>
+      download_task_observations_{this};
 
   base::WeakPtrFactory<DownloadRecordService> weak_ptr_factory_{this};
 };

@@ -12,6 +12,8 @@
 #import "ios/web/public/download/download_task_observer.h"
 #import "ios/chrome/browser/shared/public/features/features.h"
 
+#pragma mark - Public
+
 DownloadRecordService::DownloadRecordService() {
   CHECK(IsDownloadListEnabled());
 }
@@ -29,7 +31,7 @@ void DownloadRecordService::RecordDownload(web::DownloadTask* task) {
   if (downloads_.find(record.download_id) == downloads_.end()) {
     downloads_[record.download_id] = record;
     NotifyDownloadAdded(record);
-    task->AddObserver(this);
+    download_task_observations_.AddObservation(task);
   }
 }
 
@@ -68,18 +70,9 @@ void DownloadRecordService::RemoveObserver(DownloadRecordObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void DownloadRecordService::NotifyDownloadAdded(const DownloadRecord& record) {
-  observers_.Notify(&DownloadRecordObserver::OnDownloadAdded, record);
-}
-
-void DownloadRecordService::NotifyDownloadUpdated(
-    const std::string& download_id,
-    web::DownloadTask::State new_state) {
-  observers_.Notify(&DownloadRecordObserver::OnDownloadUpdated, download_id, new_state);
-}
+#pragma mark - Private
 
 #pragma mark - web::DownloadTaskObserver
-
 void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {
   DownloadRecord* record = FindRecordByTask(task);
   if (!record) {
@@ -105,11 +98,17 @@ void DownloadRecordService::OnDownloadUpdated(web::DownloadTask* task) {
 }
 
 void DownloadRecordService::OnDownloadDestroyed(web::DownloadTask* task) {
-  if (!task) {
-    return;
-  }
+  download_task_observations_.RemoveObservation(task);
+}
 
-  task->RemoveObserver(this);
+void DownloadRecordService::NotifyDownloadAdded(const DownloadRecord& record) {
+  observers_.Notify(&DownloadRecordObserver::OnDownloadAdded, record);
+}
+
+void DownloadRecordService::NotifyDownloadUpdated(
+    const std::string& download_id,
+    web::DownloadTask::State new_state) {
+  observers_.Notify(&DownloadRecordObserver::OnDownloadUpdated, download_id, new_state);
 }
 
 DownloadRecord* DownloadRecordService::FindRecordByTask(
