@@ -123,7 +123,7 @@ void DownloadListMediator::OnDownloadAdded(const DownloadRecord& record) {
 }
 
 void DownloadListMediator::OnDownloadUpdated(
-    const std::string& download_id,
+    std::string_view download_id,
     web::DownloadTask::State new_state) {
   DLOG(INFO) << "Download updated: " << download_id;
   UpdateConsumer();

@@ -41,7 +41,7 @@ class DownloadListMediator : public DownloadRecordObserver {
 
   // DownloadRecordObserver implementation
   void OnDownloadAdded(const DownloadRecord& record) override;
-  void OnDownloadUpdated(const std::string& download_id,
+  void OnDownloadUpdated(std::string_view download_id,
                          web::DownloadTask::State new_state) override;
 
  private:
