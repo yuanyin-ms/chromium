@@ -14,14 +14,13 @@
 #include "ios/chrome/browser/download/model/download_record.h"
 #import "ios/chrome/browser/download/model/download_record_service.h"
 #import "ios/chrome/browser/download/model/download_record_service_factory.h"
-#import "ios/chrome/browser/download/ui/download_list_view_controller.h"
+#import "ios/chrome/browser/download/ui/download_list_table_view_controller.h"
 #import "ios/chrome/browser/shared/model/browser/browser.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
 #import "ios/web/public/download/download_task.h"
 
-@interface DownloadListCoordinator () <DownloadListViewControllerDelegate>
-@property(nonatomic, strong) DownloadListViewController* viewController;
-@property(nonatomic, strong) UINavigationController* navigationController;
+@interface DownloadListCoordinator () <DownloadListTableViewControllerDelegate>
+@property(nonatomic, strong) DownloadListTableViewController* viewController;
 @property(nonatomic, assign) BOOL isRecoveringFromBackground;
 @end
 
@@ -31,10 +30,6 @@
 
 - (void)start {
   [super start];
-
-  // Create view controller
-  self.viewController = [[DownloadListViewController alloc] init];
-  self.viewController.delegate = self;
 
   // Create mediator
   _mediator = std::make_unique<DownloadListMediator>();
@@ -46,7 +41,6 @@
 
   // Configure mediator
   _mediator->SetDownloadRecordService(downloadRecordService);
-  _mediator->SetConsumer(self.viewController);
 
   // Add observer for becoming active
   [[NSNotificationCenter defaultCenter]
@@ -67,14 +61,11 @@
 - (void)stop {
   [super stop];
 
-  if (self.navigationController.presentingViewController) {
-    [self.navigationController dismissViewControllerAnimated:YES
-                                                  completion:nil];
-  }
+  // Close download list if it's currently presented
+  [self closeDownloadList];
 
   _mediator.reset();
   self.viewController = nil;
-  self.navigationController = nil;
   // Remove observers
   [[NSNotificationCenter defaultCenter]
       removeObserver:self
@@ -90,25 +81,39 @@
 #pragma mark - Public methods
 
 - (void)showDownloadList {
-  if (!self.viewController) {
+  if (!_mediator) {
     [self start];
   }
 
+  // Don't present if already presented
+  if (self.viewController.navigationController.presentingViewController) {
+    return;
+  }
+
+  // Create view controller
+  self.viewController = [[DownloadListTableViewController alloc] initWithStyle:UITableViewStyleInsetGrouped];
+  self.viewController.delegate = self;
+
+  // Set mediator consumer
+  _mediator->SetConsumer(self.viewController);
+  _mediator->LoadDownloadRecords();
+
   // Create navigation controller if needed
-  if (!self.navigationController) {
-    self.navigationController = [[UINavigationController alloc]
+  UINavigationController* navigationController = self.viewController.navigationController;
+  if (!navigationController) {
+    navigationController = [[UINavigationController alloc]
         initWithRootViewController:self.viewController];
 
     // Add close button
     UIBarButtonItem* closeButton = [[UIBarButtonItem alloc]
         initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                              target:self
-                             action:@selector(closeButtonTapped)];
+                             action:@selector(closeDownloadList)];
     self.viewController.navigationItem.rightBarButtonItem = closeButton;
   }
 
   // Present the view controller
-  [self.baseViewController presentViewController:self.navigationController
+  [self.baseViewController presentViewController:navigationController
                                         animated:YES
                                       completion:^{
                                         // Load download records after
@@ -119,11 +124,15 @@
   DLOG(INFO) << "DownloadListCoordinator presented";
 }
 
-#pragma mark - Private methods
-
-- (void)closeButtonTapped {
-  [self stop];
+- (void)closeDownloadList {
+  if (self.viewController.navigationController.presentingViewController) {
+    [self.viewController.navigationController dismissViewControllerAnimated:YES
+                                                                  completion:nil];
+  }
+  DLOG(INFO) << "DownloadListCoordinator dismissed";
 }
+
+#pragma mark - Private methods
 #pragma mark - Notification
 
 - (void)applicationDidBecomeActive:(NSNotification*)notification {
@@ -139,26 +148,26 @@
   self.isRecoveringFromBackground = YES;
 }
 
-#pragma mark - DownloadListViewControllerDelegate
+#pragma mark - DownloadListTableViewControllerDelegate
 
-- (void)downloadListViewControllerDidSelectRecord:(const DownloadRecord&)record {
+- (void)downloadListTableViewControllerDidSelectRecord:(const DownloadRecord&)record {
   DLOG(INFO) << "Download selected: " << record.file_name;
   // TODO: Handle download selection (e.g., open file, show details)
 }
 
-- (void)downloadListViewControllerDidFilterByFileType:(NSString*)fileType {
+- (void)downloadListTableViewControllerDidFilterByFileType:(NSString*)fileType {
   DLOG(INFO) << "Filter by file type: " << [fileType UTF8String];
   if (_mediator) {
     // TODO: Implement filtering logic in mediator
   }
 }
 
-- (void)downloadListViewControllerDidSearchByKeyword:(NSString*)keyword {
+- (void)downloadListTableViewControllerDidSearchByKeyword:(NSString*)keyword {
   DLOG(INFO) << "Search by keyword: " << [keyword UTF8String];
   // TODO: Implement search logic in mediator
 }
 
-- (void)downloadListViewControllerDidClickCancelRecord:(const DownloadRecord&)record {
+- (void)downloadListTableViewControllerDidClickCancelRecord:(const DownloadRecord&)record {
   DLOG(INFO) << "Cancel download requested for: " << record.file_name;
   if (!_mediator) {
     DLOG(WARNING) << "Cancel download failed: mediator is null";
@@ -167,7 +176,7 @@
   _mediator->CancelDownloadTask(record.download_id);
 }
 
-- (void)downloadListViewControllerDidDeleteRecord:(const DownloadRecord&)record {
+- (void)downloadListTableViewControllerDidDeleteRecord:(const DownloadRecord&)record {
   if (!_mediator) {
     DLOG(WARNING) << "Delete download failed: mediator is null";
     return;
@@ -175,12 +184,12 @@
   _mediator->RemoveDownloadTask(record.download_id);
 }
 
-- (void)downloadListViewControllerDidClickShareRecord:(const DownloadRecord&)record {
+- (void)downloadListTableViewControllerDidClickShareRecord:(const DownloadRecord&)record {
   DLOG(INFO) << "Share download requested for: " << record.file_name;
   // TODO: Implement sharing functionality
 }
 
-- (void)downloadListViewControllerDidClickShowInFilesAppForRecord:
+- (void)downloadListTableViewControllerDidClickShowInFilesAppForRecord:
     (const DownloadRecord&)record {
   DLOG(INFO) << "Show in Files App requested for: " << record.file_name;
   // TODO: Implement showing file in Files app

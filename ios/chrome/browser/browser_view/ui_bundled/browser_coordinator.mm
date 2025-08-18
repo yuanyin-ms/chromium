@@ -2263,7 +2263,23 @@ enum class ToolbarKind {
 }
 
 - (void)showDownloadsFolder {
-  [self.downloadListCoordinator showDownloadList];
+  if (IsDownloadListEnabled()) {
+    [self.downloadListCoordinator showDownloadList];
+    return;
+  }
+
+  NSURL* URL = GetFilesAppUrl();
+  if (!URL) {
+    return;
+  }
+
+  [[UIApplication sharedApplication] openURL:URL
+                                     options:@{}
+                           completionHandler:nil];
+
+  base::UmaHistogramEnumeration(
+      "Download.OpenDownloads.PerProfileType",
+      profile_metrics::GetBrowserProfileType(self.profile));
 }
 
 - (void)showRecentTabs {
