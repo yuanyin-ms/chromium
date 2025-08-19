@@ -13,6 +13,9 @@
 // Shows the download list.
 - (void)showDownloadList;
 
+// Closes the download list.
+- (void)closeDownloadList;
+
 @end
 
 #endif  // IOS_CHROME_BROWSER_DOWNLOAD_COORDINATOR_DOWNLOAD_LIST_COORDINATOR_H_
